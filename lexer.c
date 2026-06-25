@@ -8,18 +8,17 @@ int next_token(FILE *f, char *token_buffer, int max_size) {
     int len = 0;
 
     while ((ch = fgetc(f)) != EOF) {
-        if (ch == '\n') {
+        if (ch == '\n')
             state.current_line++;
-        }
+        
         if (isspace(ch)) {
             if (len > 0) break;
             continue;
         }
         if (ch == ';') {
             while ((ch = fgetc(f)) != EOF && ch != '\n') {}
-            if (ch == '\n') {
+            if (ch == '\n')
                 state.current_line++;
-            }
             if (len > 0) break;
             continue;
         }
@@ -42,9 +41,8 @@ int next_token(FILE *f, char *token_buffer, int max_size) {
 
     token_buffer[len] = '\0';
 
-    if (len > 0 && state.pass == 2) {
+    if (len > 0 && state.pass == 2)
         state.token_count++;
-    }
 
     return len > 0;
 }

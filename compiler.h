@@ -32,6 +32,5 @@ struct CompilerState {
 };
 
 extern struct CompilerState state;
-void emit_instruction(uint16_t op);
 
 #endif
