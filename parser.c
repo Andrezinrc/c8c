@@ -1,29 +1,12 @@
 #include "parser.h"
 #include "lexer.h"
 #include "compiler.h"
+#include "reserved_words.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
-
-static const char *const RESERVED_WORDS[] = {
-    "cls", "ret", "sys", "jp", "call", "se", "sne", "ld",
-    "add", "or", "and", "xor", "sub", "shr", "subn", "shl",
-    "rnd", "drw", "skp", "sknp",
-    "spr", "alias", "i", "dt", "st", "f", "b", "[i]", "k",
-    "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", 
-    "v8", "v9", "va", "vb", "vc", "vd", "ve", "vf"
-};
-
-int is_reserved_keyword(const char *name)
-{
-    for (size_t i = 0; i < ARRAY_SIZE(RESERVED_WORDS); i++)
-        if (strcmp(name, RESERVED_WORDS[i]) == 0)
-            return 1;
-
-    return 0;
-}
 
 void validate_identifier(const char *name, const char *context)
 {
@@ -236,7 +219,8 @@ static void handle_se_sne(FILE *src, const char *mnemonic)
     get_operand(src, op1, sizeof(op1));
     get_operand(src, op2, sizeof(op2));
     
-    if (!IS_REG(op1)) error_invalid_reg(mnemonic);
+    if (!IS_REG(op1))
+        error_invalid_reg(mnemonic);
     int regX = PARSE_REG(op1);
 
     if (IS_REG(op2)) {
@@ -254,7 +238,8 @@ static void handle_skp_sknp(FILE *src, const char *mnemonic)
 {
     char op[32];
     get_operand(src, op, sizeof(op));
-    if (!IS_REG(op)) error_invalid_reg(mnemonic);
+    if (!IS_REG(op))
+        error_invalid_reg(mnemonic);
     
     int regX = PARSE_REG(op);
     uint16_t suffix = (strcmp(mnemonic, "skp") == 0) ? 0x009E : 0x00A1;
@@ -297,7 +282,8 @@ static void handle_ld(FILE *src, const char *mnemonic)
         return;
     }
 
-    if (!IS_REG(op1)) error_invalid_reg(mnemonic);
+    if (!IS_REG(op1))
+        error_invalid_reg(mnemonic);
     int regX = PARSE_REG(op1);
 
     if      (strcmp(op2, "dt")  == 0)
@@ -319,12 +305,14 @@ static void handle_add(FILE *src, const char *mnemonic)
     get_operand(src, op2, sizeof(op2));
 
     if (strcmp(op1, "i") == 0) {
-        if (!IS_REG(op2)) error_invalid_reg(mnemonic);
+        if (!IS_REG(op2))
+            error_invalid_reg(mnemonic);
         emit_instruction(0xF01E | (PARSE_REG(op2) << 8));
         return;
     }
 
-    if (!IS_REG(op1)) error_invalid_reg(mnemonic);
+    if (!IS_REG(op1))
+        error_invalid_reg(mnemonic);
     int regX = PARSE_REG(op1);
 
     if (IS_REG(op2))
@@ -339,7 +327,8 @@ static void handle_alu(FILE *src, const char *mnemonic)
     get_operand(src, op1, sizeof(op1));
     get_operand(src, op2, sizeof(op2));
 
-    if (!IS_REG(op1) || (!IS_REG(op2) && op2[0] != '\0')) error_invalid_reg(mnemonic);
+    if (!IS_REG(op1) || (!IS_REG(op2) && op2[0] != '\0'))
+        error_invalid_reg(mnemonic);
     
     int regX = PARSE_REG(op1);
     int regY = (op2[0] != '\0') ? PARSE_REG(op2) : regX;
@@ -369,7 +358,8 @@ static void handle_rnd(FILE *src, const char *mnemonic)
     get_operand(src, op1, sizeof(op1));
     get_operand(src, op2, sizeof(op2));
     
-    if (!IS_REG(op1)) error_invalid_reg(mnemonic);
+    if (!IS_REG(op1))
+        error_invalid_reg(mnemonic);
     int regX = PARSE_REG(op1);
     
     uint8_t val = (uint8_t)strtol(op2, NULL, 0);
@@ -383,7 +373,8 @@ static void handle_drw(FILE *src, const char *mnemonic)
     get_operand(src, op2, sizeof(op2));
     get_operand(src, op3, sizeof(op3));
 
-    if (!IS_REG(op1) || !IS_REG(op2)) error_invalid_reg(mnemonic);
+    if (!IS_REG(op1) || !IS_REG(op2))
+        error_invalid_reg(mnemonic);
     
     int regX = PARSE_REG(op1);
     int regY = PARSE_REG(op2);
@@ -420,12 +411,11 @@ static const InstructionDef INSTRUCTIONS[] = {
 
 static void parse_instruction(FILE *src, const char *mnemonic)
 {
-    for (size_t i = 0; i < ARRAY_SIZE(INSTRUCTIONS); i++) {
+    for (size_t i = 0; i < ARRAY_SIZE(INSTRUCTIONS); i++)
         if (strcmp(mnemonic, INSTRUCTIONS[i].mnemonic) == 0) {
             INSTRUCTIONS[i].handler(src, mnemonic);
             return;
         }
-    }
 
     fprintf(stderr, "[ERROR] line %d: Unknown mnemonic '%s'.\n", state.current_line, mnemonic);
     exit(1);
