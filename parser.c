@@ -1,6 +1,6 @@
 #include "parser.h"
 #include "lexer.h"
-#include "compiler.h"
+#include "assembler.h"
 #include "reserved_words.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +31,7 @@ void str_to_lower(char *str)
 
 int peek_next_token(FILE *src, char *buf, size_t size)
 {
+    // Save current position to look ahead without consuming the token
     long pos = ftell(src);
     int result = next_token(src, buf, size);
     fseek(src, pos, SEEK_SET);
@@ -65,13 +66,13 @@ int next_token_resolved(FILE *f, char *token_buffer, int max_size)
 
     str_to_lower(token_buffer);
 
-    for (int i = 0; i < state.alias_count; i++) {
+    for (int i = 0; i < state.alias_count; i++)
         if (strcmp(token_buffer, state.aliases[i].name) == 0) {
             strncpy(token_buffer, state.aliases[i].reg_id, max_size - 1);
             token_buffer[max_size - 1] = '\0';
             break;
         }
-    }
+
     return 1;
 }
 
@@ -159,7 +160,7 @@ static void parse_sprite_directive(FILE *src)
     }
     
     if (state.pc % 2 != 0)
-        emit_byte(0x00);
+        emit_byte(0x00); // Pad with a null byte to maintain 16-bit alignment
 }
 
 static void error_invalid_reg(const char *mnemonic)
@@ -196,7 +197,7 @@ static void handle_jp(FILE *src, const char *mnemonic)
     (void)mnemonic;
     char op1[32], op2[32];
     get_operand(src, op1, sizeof(op1));
-    
+
     if (strcmp(op1, "v0") == 0) {
         get_operand(src, op2, sizeof(op2));
         emit_instruction(0xB000 | resolve_address(op2));
@@ -257,27 +258,32 @@ static void handle_ld(FILE *src, const char *mnemonic)
         return;
     }
     if (strcmp(op1, "dt") == 0) {
-        if (!IS_REG(op2)) error_invalid_reg(mnemonic);
+        if (!IS_REG(op2))
+            error_invalid_reg(mnemonic);
         emit_instruction(0xF015 | (PARSE_REG(op2) << 8));
         return;
     }
     if (strcmp(op1, "st") == 0) {
-        if (!IS_REG(op2)) error_invalid_reg(mnemonic);
+        if (!IS_REG(op2))
+            error_invalid_reg(mnemonic);
         emit_instruction(0xF018 | (PARSE_REG(op2) << 8));
         return;
     }
     if (strcmp(op1, "f") == 0) {
-        if (!IS_REG(op2)) error_invalid_reg(mnemonic);
+        if (!IS_REG(op2))
+            error_invalid_reg(mnemonic);
         emit_instruction(0xF029 | (PARSE_REG(op2) << 8));
         return;
     }
     if (strcmp(op1, "b") == 0) {
-        if (!IS_REG(op2)) error_invalid_reg(mnemonic);
+        if (!IS_REG(op2))
+            error_invalid_reg(mnemonic);
         emit_instruction(0xF033 | (PARSE_REG(op2) << 8));
         return;
     }
     if (strcmp(op1, "[i]") == 0) {
-        if (!IS_REG(op2)) error_invalid_reg(mnemonic);
+        if (!IS_REG(op2))
+            error_invalid_reg(mnemonic);
         emit_instruction(0xF055 | (PARSE_REG(op2) << 8));
         return;
     }
@@ -331,6 +337,7 @@ static void handle_alu(FILE *src, const char *mnemonic)
         error_invalid_reg(mnemonic);
     
     int regX = PARSE_REG(op1);
+    // If 2nd operand is missing, default to regX for shifts
     int regY = (op2[0] != '\0') ? PARSE_REG(op2) : regX;
 
     uint16_t suffix = 0;

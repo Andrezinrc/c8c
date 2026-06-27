@@ -1,5 +1,5 @@
-#ifndef COMPILER_H
-#define COMPILER_H
+#ifndef ASSEMBLER_H
+#define ASSEMBLER_H
 
 #include <stdint.h>
 
@@ -16,7 +16,7 @@ struct RegAlias {
     char reg_id[8];
 };
 
-struct CompilerState {
+struct AssemblerState {
     uint8_t rom[MAX_ROM_SIZE];
     uint16_t pc;
     
@@ -31,6 +31,6 @@ struct CompilerState {
     int pass;
 };
 
-extern struct CompilerState state;
+extern struct AssemblerState state;
 
 #endif

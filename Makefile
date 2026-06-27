@@ -1,4 +1,4 @@
-TARGET = c8c
+TARGET = c8asm
 BUILD_DIR = build
 
 CC = gcc

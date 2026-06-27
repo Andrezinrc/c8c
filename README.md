@@ -1,12 +1,6 @@
-# Chip8 Compiler
+# c8asm
 
-A two-pass CHIP-8 compiler/assembler written in pure C, designed to assemble CHIP-8 assembly source code into executable binary ROMs.
-
-## Features
-
-* **Two-Pass Assembly:** Properly resolves forward and backward label references.
-* **Register Aliasing:** Support for custom register names using the `alias` directive.
-* **Sprite Inlining:** Easy bytecode embedding for graphics using the `spr` directive.
+A CHIP-8 assembler in pure C that turns text files into executable ROMs.
 
 ## Building
 
@@ -18,7 +12,7 @@ Build the project using the provided `Makefile`:
 
 ## Execution
 
-Run the compiler by passing the source file and the output ROM path:
+Run passing the source file and the output ROM path:
 
 ```bash
     ./c8c source.c8 output.ch8
