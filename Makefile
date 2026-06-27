@@ -19,4 +19,11 @@ $(BUILD_DIR)/%.o: %.c
 clean:
 	rm -rf $(TARGET) $(BUILD_DIR) *.ch8
 
-.PHONY: all clean
+vim:
+	@echo "Installing Vim syntax highlighting..."
+	@mkdir -p $(HOME)/.vim/syntax $(HOME)/.vim/ftdetect
+	@cp c8asm-theme/syntax/chip8.vim $(HOME)/.vim/syntax/chip8.vim
+	@cp c8asm-theme/ftdetect/chip8.vim $(HOME)/.vim/ftdetect/chip8.vim
+	@echo "Vim syntax configuration completed."
+
+.PHONY: all clean vim

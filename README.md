@@ -18,6 +18,14 @@ Run the assembler by passing the source file and the output ROM path:
     ./c8asm source.c8 output.ch8
 ```
 
+## Vim Syntax Highlighting
+
+To automatically enable syntax highlighting for your `.c8` source files in Vim, run:
+
+```bash
+make vim
+```
+
 ## Syntax Example
 
 ```assembly
